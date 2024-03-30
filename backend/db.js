@@ -5,6 +5,23 @@ mongoose.connect(process.env.MONGODB_URL)
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
   const userSchema = new mongoose.Schema({
+    id:{
+        type:String,
+        required:true
+    },
+    name: {
+        type: String,
+        required: true,
+        trim: true,
+        maxLength: 40
+    },
+    phone: {
+        type: String,
+        required: true,
+        trim: true,
+        minLength: 10,
+        maxLength:13
+    },
     email: {
         type: String,
         required: true,
@@ -13,20 +30,6 @@ mongoose.connect(process.env.MONGODB_URL)
         lowercase: true,
         minLength: 7,
         maxLength: 30
-    },
-    phone: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        minLength: 10,
-        maxLength:13
-    },
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-        maxLength: 50
     },
     hobbies: {
         type: String,
