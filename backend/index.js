@@ -102,6 +102,22 @@ app.put("/update", async (req, res) => {
     }
 });
 
+// Delete request to delete particular user
+
+app.delete("/delete", async (req, res) => {
+    try {
+        const userId = req.query.id;
+        await User.deleteOne(
+            { _id: userId } // Query criteria to match the document
+        );
+        res.json({ message: "User deleted successfully" });
+    } catch (error) {
+        console.error("Error occurred while deleting data:", error);
+        res.status(500).json({ message: "Error occurred while deleting data" });
+    }
+});
+
+
 
 // Get request for sending bulk users to frontend
 
@@ -111,6 +127,8 @@ app.get("/", async (req, res) => {
         const users=await User.find();
 
         const formattedUsers=users.map(user=>({
+            _id:user._id,
+            uid:user.uid,
             name:user.name,
             phone:user.phone,
             email:user.email,
