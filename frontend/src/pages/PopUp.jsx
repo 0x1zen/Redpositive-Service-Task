@@ -1,27 +1,57 @@
 import { useState } from 'react';
-
+import axios from 'axios';
 const Popup = ({ isOpen, onClose }) => {
+  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     hobbies: ''
   });
+  const [phoneError, setPhoneError] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
-      ...prevState,
-      [name]: value
+        ...prevState,
+        [name]: value
     }));
-  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission
-    console.log(formData);
-    onClose();
-  };
+    // Validation for phone number
+    if (name === 'phone') {
+        if (!/^\d{10,13}$/.test(value)) {
+            setPhoneError('Phone number must be between 10 to 13 digits');
+        } else {
+            setPhoneError('');
+        }
+    }
+
+    // Validation for email
+    if (name === 'email') {
+        if (!/\S+@\S+\.\S+/.test(value)) {
+            setEmailError('Invalid email format');
+        } else {
+            setEmailError('');
+        }
+    }
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  // Handle form submission
+  const data = formData;
+  console.log(data);
+  try {
+      const response = await axios.post('http://localhost:3000/signup', data);
+      console.log('Response from server:', response.data);
+      onClose();
+  } catch (error) {
+      console.error('Error sending data to the server:', error);
+  }
+};
+
+
 
   return (
     isOpen &&
@@ -52,6 +82,7 @@ const Popup = ({ isOpen, onClose }) => {
               onChange={handleChange}
               required
             />
+            {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
@@ -64,6 +95,7 @@ const Popup = ({ isOpen, onClose }) => {
               onChange={handleChange}
               required
             />
+            {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="hobbies">Hobbies</label>

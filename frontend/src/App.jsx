@@ -1,6 +1,6 @@
 import './index.css'
-import Table from './components/Table'
-import Popup from './components/PopUp'
+import Table from './pages/Table'
+import Popup from './pages/PopUp'
 
 
 
