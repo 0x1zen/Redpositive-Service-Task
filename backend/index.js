@@ -27,7 +27,7 @@ const signupBody = zod.object({
 // console.log(
 //     signupBody.safeParse({
 //       name: "test",
-//       phone: "+919689480487",
+//       phone: "+919999999999",
 //       email:"raj@raj.com",
 //       hobbies:"game,ball"
 //     })
@@ -35,64 +35,96 @@ const signupBody = zod.object({
 
 // User Signup Request
 
-app.post("/signup",async(req,res)=>{
-    console.log(req.body);
-    // const { success } = signupBody.safeParse(req.body);
-
-    // if(!success){
-    //     res.status(411).json({message:"Email Already Taken/Incorrect Inputs"})
-    // }
-    try{
-         const { success } = signupBody.safeParse(req.body);
-    }
-    catch(error){
-        res.status(411).json({message:"Email Already Taken/Incorrect Inputs"})
-    }
-    
+app.post("/signup", async (req, res) => {
     try {
-        const existingUser = await User.findOne({
-            email: req.body.email
-        });
-    
-        if (existingUser) {
-            return res.status(411).json({
-                message: "Email already taken/Incorrect inputs"
-            });
+        const { success, error } = signupBody.safeParse(req.body);
+        if (!success) {
+            return res.status(400).json({ message: "Please Input Valid Details!" });
         }
-    } catch (error) {
-        // Handle the error
-        res.status(500).json({
-            message: "Internal Server Error"
-        });
-    }
-    
-    // const existingUser = await User.findOne({
-    //     email:req.body.email
-    // })
-    // if (existingUser) {
-    //     return res.status(411).json({
-    //         message: "Email already taken/Incorrect inputs"
-    //     })
-    // }
-    
-    const user = await User.create({
-        id:Math.floor(1 + Math.random() * 1000),
-        name: req.body.name,
-        phone: req.body.phone,
-        email: req.body.email,
-        hobbies: req.body.hobbies
-    })
-    res.json({
-        message: "User created successfully",
-    })
 
+        // Check if user already exists
+        const existingUser = await User.findOne({ email: req.body.email });
+        if (existingUser) {
+            return res.status(409).json({ message: "Email already taken" });
+        }
+
+        // Create new user
+        const newUser = await User.create({
+            uid: Math.floor(1 + Math.random() * 1000),
+            name: req.body.name,
+            phone: req.body.phone,
+            email: req.body.email,
+            hobbies: req.body.hobbies
+        });
+
+        res.json({ message: "User created successfully", user: newUser });
+    } catch (error) {
+        console.error("Error occurred during signup:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+
+const updateBody = zod.object({
+	name: zod.string().max(40).optional(),
+    phone: zod.string()
+    .min(10, { message: 'Phone number must be at least 10 digits long' })
+    .max(13, { message: 'Phone number cannot exceed 13 digits' })
+    .regex(phoneRegex, { message: 'Invalid Number!' })
+    .optional(),
+    email: zod.string().email().optional(),
+    hobbies: zod.string().max(50).optional()
 })
+
+
+
+app.put("/update", async (req, res) => {
+    try {
+        const { success, error } = updateBody.safeParse(req.body);
+        if (!success) {
+            return res.status(400).json({ message: error.message });
+        }
+
+        const userId = req.query.id;
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is missing in the request" });
+        }
+
+        await User.updateOne(
+            { _id: userId }, // Query criteria
+            req.body // Update document
+        );
+
+        res.json({ message: "Updated successfully" });
+    } catch (error) {
+        console.error("Error occurred while updating data:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 
 // Get request for sending bulk users to frontend
 
-// app.get("/",async(req,res)=>{
+app.get("/", async (req, res) => {
+    try{
+        // retrieveing all users
+        const users=await User.find();
 
-// })
+        const formattedUsers=users.map(user=>({
+            name:user.name,
+            phone:user.phone,
+            email:user.email,
+            hobbies:user.hobbies
+        }));
+        res.json({ users: formattedUsers });
+    }
+    catch(error){
+        console.error("Error occurred while fetching users:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+
 
 app.listen(3000,()=>{
     console.log("Listening On Port 3000");

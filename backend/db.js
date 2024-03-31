@@ -5,7 +5,7 @@ mongoose.connect(process.env.MONGODB_URL)
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
   const userSchema = new mongoose.Schema({
-    id:{
+    uid:{
         type:String,
         required:true
     },
