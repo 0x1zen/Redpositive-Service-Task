@@ -6,7 +6,7 @@ import SuccessPopup from '../components/SuccessPopUp';
 function Table() {
     const [users, setUsers] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
-    const [isPopupOpen, setIsPopupOpen] = useState(false); // State to manage the popup window
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     useEffect(() => {
         axios.get('http://localhost:3000/')
@@ -39,12 +39,10 @@ function Table() {
         setUsers(updatedUsers);
     };
 
-    // Function to open the popup window
     const openPopup = () => {
         setIsPopupOpen(true);
     };
 
-    // Function to close the popup window
     const closePopup = () => {
         setIsPopupOpen(false);
         setShowSuccessPopup(true);
@@ -93,7 +91,7 @@ function Table() {
                 <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded mb-4 mr-4" onClick={openPopup}>Add</button>
                 <button className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded mb-4">Send</button>
             </div>
-            {showSuccessPopup && <SuccessPopup message="User added successfully!Refreshing Page" />} {/* Conditional rendering of SuccessPopup */}
+            {showSuccessPopup && <SuccessPopup message="User added successfully!Refreshing Page" />}
             <Popup isOpen={isPopupOpen} onClose={closePopup} />
         </div>
     );
